@@ -1,10 +1,11 @@
-import * as Assert from "./deps/asserts.ts";
+import { assertEquals } from "./deps/asserts.ts";
 import { exec, OutputMode } from "./deps/exec.ts";
 
 import { greeter } from "./mod.ts";
 
-Deno.test("hello", () => {
-  Assert.assertEquals(greeter("Graeme"), "Hello Graeme");
+Deno.test("typepiler-tool-kotlin", async () => {
+  assertEquals(greeter("Graeme"), "Hello Graeme");
+  await gradle();
 });
 
 /*
@@ -40,5 +41,5 @@ async function gradle() {
     console.log(result);
   }
 
-  Assert.assertEquals(result.status.code, 0);
+  assertEquals(result.status.code, 0);
 }

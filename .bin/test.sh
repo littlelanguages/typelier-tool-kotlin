@@ -2,7 +2,7 @@
 
 .bin/build.sh
 
-deno fmt --check
+deno fmt --check *.ts
 
 if [[ "$?" != "0" ]]
 then
