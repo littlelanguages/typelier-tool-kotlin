@@ -1,5 +1,5 @@
-import * as Assert from "./testing/asserts.ts";
-import { exec, OutputMode } from "https://deno.land/x/exec@0.0.5/mod.ts";
+import * as Assert from "./deps/asserts.ts";
+import { exec, OutputMode } from "./deps/exec.ts";
 
 import { greeter } from "./mod.ts";
 
