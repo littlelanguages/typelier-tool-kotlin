@@ -1,35 +1,29 @@
 import { assertEquals } from "./deps/asserts.ts";
 import { exec, OutputMode } from "./deps/exec.ts";
+import { command } from "./mod.ts";
 
-import { greeter } from "./mod.ts";
+import * as Errors from "./errors.ts";
 
 Deno.test("typepiler-tool-kotlin", async () => {
-  assertEquals(greeter("Graeme"), "Hello Graeme");
-  await gradle();
-});
-
-/*
-Deno.test("scanpiler-tool-kotlin", async () => {
-  await parspiler("alternative");
-  await parspiler("simple");
-  await parspiler("parspiler");
+  const errors = await testpiler("sets");
+  assertEquals(errors, []);
 
   await gradle();
 });
-*/
 
-// async function parspiler(name: string) {
-//   await command(
-//     `./test/src/main/kotlin/${name}/parser.llgd`,
-//     {
-//       directory: "./test/src/main/kotlin",
-//       scannerPackage: `${name}.scanner`,
-//       parserPackage: `${name}`,
-//       force: true,
-//       verbose: true,
-//     },
-//   );
-// }
+async function testpiler(name: string): Promise<Errors.Errors> {
+  return await command(
+    [{
+      src: `./test/src/main/kotlin/${name}/types.llt`,
+      package: `${name}.Types`,
+    }],
+    {
+      directory: "./test/src/main/kotlin",
+      force: true,
+      verbose: true,
+    },
+  );
+}
 
 async function gradle() {
   const result = await exec(

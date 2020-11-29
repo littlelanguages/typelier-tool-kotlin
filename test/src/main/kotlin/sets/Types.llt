@@ -1,0 +1,3 @@
+Boolean = {True, False};
+
+BinaryOp = {Equal, NotEqual, LessEqual, LessThan, GreaterEqual, GreaterThan};
