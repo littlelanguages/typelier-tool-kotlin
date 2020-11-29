@@ -14,7 +14,7 @@ Deno.test("typepiler-tool-kotlin", async () => {
 async function testpiler(name: string): Promise<Errors.Errors> {
   return await command(
     [{
-      src: `./test/src/main/kotlin/${name}/types.llt`,
+      src: `./test/src/main/kotlin/${name}/Types.llt`,
       package: `${name}.Types`,
     }],
     {
