@@ -19,8 +19,8 @@ type CommandOptions = {
 export const command = (
   srcs: Array<CommandSrc>,
   options: CommandOptions,
-): Promise<Errors.Errors> =>
-  (mustBuild(srcs, options))
+): Promise<Errors.Errors> => {
+  const buildResult = (mustBuild(srcs, options))
     ? Typepiler.translateFiles(srcs.map((src) => src.src)).then(
       (translateResult) =>
         translateResult.either(
@@ -29,6 +29,9 @@ export const command = (
         ),
     )
     : Promise.resolve([]);
+
+  return buildResult.then((r) => copyLibrary(options).then((_) => r));
+};
 
 const writeTypess = (
   typess: Array<Typepiler.Types>,
@@ -129,4 +132,51 @@ const fileDateTime = (name: string): number => {
   } catch (_) {
     return 0;
   }
+};
+
+export const copyLibrary = async (
+  options: CommandOptions,
+): Promise<void> => {
+  const copyFile = async (
+    srcName: string,
+    targetName: string,
+  ): Promise<void> => {
+    const outputFileName = `${options.directory || "./"}/${targetName}`;
+
+    if (options.force || fileDateTime(outputFileName) === 0) {
+      const srcFileName = `${Path.dirname(import.meta.url)}/${srcName}`;
+
+      console.log(`Copy ${srcName}`);
+
+      return Deno.mkdir(Path.dirname(outputFileName), { recursive: true })
+        .then((_) =>
+          (srcFileName.startsWith("file://"))
+            ? Deno.copyFile(
+              srcFileName.substr(7),
+              outputFileName,
+            )
+            : srcFileName.startsWith("http://") ||
+                srcFileName.startsWith("https://")
+            ? fetch(srcFileName).then((response) => response.text()).then((
+              t: string,
+            ) => Deno.writeFile(outputFileName, new TextEncoder().encode(t)))
+            : Deno.copyFile(
+              srcFileName,
+              outputFileName,
+            )
+        );
+    } else {
+      return Promise.resolve();
+    }
+  };
+
+  await copyFile(
+    "lib/kotlin/Tuple.kt",
+    "io/littlelanguages/data/Tuple.kt",
+  );
+
+  return await copyFile(
+    "lib/kotlin/Union.kt",
+    "io/littlelanguages/data/Union.kt",
+  );
 };

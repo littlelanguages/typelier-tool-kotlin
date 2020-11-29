@@ -1,0 +1,3 @@
+SimpleA :: String * String;
+
+SimpleB :: Seq (String * String);
