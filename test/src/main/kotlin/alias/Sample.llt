@@ -1,0 +1,4 @@
+use "../composite/Record.llt" as Record;
+use "../composite/Simple.llt" as Simple;
+
+Declarations = Seq Record.SetDeclaration;

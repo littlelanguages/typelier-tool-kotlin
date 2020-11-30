@@ -89,6 +89,8 @@ const renderDeclaration = (
     ? renderSimpleDeclaration(declaration, srcs)
     : (declaration.tag === "RecordComposite")
     ? renderRecordDeclaration(declaration, srcs)
+    : (declaration.tag === "AliasDeclaration")
+    ? renderAliasDeclaration(declaration, srcs)
     : PP.empty;
 
 const renderSetDeclaration = (declaration: Typepiler.SetDeclaration): PP.Doc =>
@@ -139,6 +141,14 @@ const renderRecordDeclaration = (
       ")",
     ]),
   ]);
+
+const renderAliasDeclaration = (
+  declaration: Typepiler.AliasDeclaration,
+  srcs: Array<CommandSrc>,
+): PP.Doc =>
+  PP.hcat(
+    ["typealias ", declaration.name, " = ", renderType(declaration.type, srcs)],
+  );
 
 const renderType = (
   type: Typepiler.Type,
