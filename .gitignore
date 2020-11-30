@@ -2,3 +2,4 @@ test/src/main/kotlin/sets/Types.kt
 
 test/src/main/kotlin/io/littlelanguages/data/Tuple.kt
 test/src/main/kotlin/io/littlelanguages/data/Union.kt
+test/src/main/kotlin/composite/Simple.kt

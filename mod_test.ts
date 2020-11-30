@@ -5,17 +5,17 @@ import { command } from "./mod.ts";
 import * as Errors from "./errors.ts";
 
 Deno.test("typepiler-tool-kotlin", async () => {
-  const errors = await testpiler("sets");
-  assertEquals(errors, []);
+  await testpiler("sets", "Types");
+  await testpiler("composite", "Simple");
 
   await gradle();
 });
 
-async function testpiler(name: string): Promise<Errors.Errors> {
-  return await command(
+async function testpiler(dir: string, name: string): Promise<void> {
+  const errors = await command(
     [{
-      src: `./test/src/main/kotlin/${name}/Types.llt`,
-      package: `${name}.Types`,
+      src: `./test/src/main/kotlin/${dir}/${name}.llt`,
+      package: `${dir}.${name}`,
     }],
     {
       directory: "./test/src/main/kotlin",
@@ -23,6 +23,8 @@ async function testpiler(name: string): Promise<Errors.Errors> {
       verbose: true,
     },
   );
+
+  assertEquals(errors, []);
 }
 
 async function gradle() {

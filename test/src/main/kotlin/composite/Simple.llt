@@ -1,3 +1,5 @@
 SimpleA :: String * String;
 
 SimpleB :: Seq (String * String);
+
+SimpleC :: Map String SimpleA;

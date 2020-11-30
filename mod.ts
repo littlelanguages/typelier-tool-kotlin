@@ -58,7 +58,7 @@ const writeTypes = async (
     ]);
   } else {
     const fileName = targetFileName(src, options);
-    const doc = renderDeclarations(src.package, types.declarations);
+    const doc = renderDeclarations(src.package, types.declarations, srcs);
 
     const writer = await Deno.create(fileName);
     await PP.render(doc, writer);
@@ -71,16 +71,22 @@ const writeTypes = async (
 const renderDeclarations = (
   className: string,
   declarations: Typepiler.Declarations,
+  srcs: Array<CommandSrc>,
 ): PP.Doc =>
   PP.vcat([
     PP.hsep(["package", packageName(className)]),
     "",
-    PP.vcat(declarations.map(renderDeclaration)),
+    PP.vcat(declarations.map((d) => renderDeclaration(d, srcs))),
   ]);
 
-const renderDeclaration = (declaration: Typepiler.Declaration): PP.Doc =>
+const renderDeclaration = (
+  declaration: Typepiler.Declaration,
+  srcs: Array<CommandSrc>,
+): PP.Doc =>
   (declaration.tag === "SetDeclaration")
     ? renderSetDeclaration(declaration)
+    : (declaration.tag === "SimpleComposite")
+    ? renderSimpleDeclaration(declaration, srcs)
     : PP.empty;
 
 const renderSetDeclaration = (declaration: Typepiler.SetDeclaration): PP.Doc =>
@@ -89,6 +95,72 @@ const renderSetDeclaration = (declaration: Typepiler.SetDeclaration): PP.Doc =>
     PP.nest(2, PP.hsep(declaration.elements, ", ")),
     "}",
   ]);
+
+const renderSimpleDeclaration = (
+  declaration: Typepiler.SimpleComposite,
+  srcs: Array<CommandSrc>,
+): PP.Doc =>
+  PP.hcat(
+    [
+      "data class ",
+      declaration.name,
+      "(val state: ",
+      renderType(declaration.type, srcs),
+      ")",
+    ],
+  );
+
+const renderType = (
+  type: Typepiler.Type,
+  srcs: Array<CommandSrc>,
+): PP.Doc =>
+  (type.tag === "Tuple")
+    ? PP.hcat(
+      [
+        "io.littlelanguages.data.Tuple",
+        type.value.length.toString(),
+        "<",
+        PP.hsep(type.value.map((t) => renderType(t, srcs)), ", "),
+        ">",
+      ],
+    )
+    : (type.declaration.tag === "InternalDeclaration")
+    ? PP.hcat(
+      [
+        internalTypeNames.get(type.declaration.name)!,
+        type.declaration.arity === 0 ? PP.blank : PP.hcat([
+          "<",
+          PP.hsep(type.parameters.map((t) => renderType(t, srcs)), ", "),
+          ">",
+        ]),
+      ],
+    )
+    : PP.hcat(
+      [
+        packageName(findSrc(type.declaration.src, srcs)!.package),
+        ".",
+        type.declaration.name,
+      ],
+    );
+
+const internalTypeNames = new Map([
+  ["Bool", "Boolean"],
+  ["U8", "UByte"],
+  ["S8", "Byte"],
+  ["U16", "UShort"],
+  ["S16", "Short"],
+  ["U32", "UInt"],
+  ["S32", "Int"],
+  ["U64", "ULong"],
+  ["S64", "Long"],
+  ["F32", "Float"],
+  ["F64", "Double"],
+  ["Char", "Char"],
+  ["String", "String"],
+  ["Seq", "List"],
+  ["Set", "Set"],
+  ["Map", "Map"],
+]);
 
 const packageName = (className: string): string => {
   const lastIndex = className.lastIndexOf(".");
