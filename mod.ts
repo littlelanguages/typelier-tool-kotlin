@@ -76,7 +76,7 @@ const renderDeclarations = (
   PP.vcat([
     PP.hsep(["package", packageName(className)]),
     "",
-    PP.vcat(declarations.map((d) => renderDeclaration(d, srcs))),
+    PP.vcat(declarations.map((d) => PP.vcat([renderDeclaration(d, srcs), ""]))),
   ]);
 
 const renderDeclaration = (
@@ -87,6 +87,8 @@ const renderDeclaration = (
     ? renderSetDeclaration(declaration)
     : (declaration.tag === "SimpleComposite")
     ? renderSimpleDeclaration(declaration, srcs)
+    : (declaration.tag === "RecordComposite")
+    ? renderRecordDeclaration(declaration, srcs)
     : PP.empty;
 
 const renderSetDeclaration = (declaration: Typepiler.SetDeclaration): PP.Doc =>
@@ -109,6 +111,34 @@ const renderSimpleDeclaration = (
       ")",
     ],
   );
+
+const renderRecordDeclaration = (
+  declaration: Typepiler.RecordComposite,
+  srcs: Array<CommandSrc>,
+): PP.Doc =>
+  PP.vcat([
+    PP.hcat(
+      [
+        "data class ",
+        declaration.name,
+        "(",
+      ],
+    ),
+    PP.hcat([
+      PP.nest(
+        2,
+        PP.vcat(
+          PP.punctuate(
+            ",",
+            declaration.fields.map(([n, y]) =>
+              PP.hcat(["val ", n, ": ", renderType(y, srcs)])
+            ),
+          ),
+        ),
+      ),
+      ")",
+    ]),
+  ]);
 
 const renderType = (
   type: Typepiler.Type,

@@ -2,11 +2,10 @@ import { assertEquals } from "./deps/asserts.ts";
 import { exec, OutputMode } from "./deps/exec.ts";
 import { command } from "./mod.ts";
 
-import * as Errors from "./errors.ts";
-
 Deno.test("typepiler-tool-kotlin", async () => {
   await testpiler("sets", "Types");
   await testpiler("composite", "Simple");
+  await testpiler("composite", "Record");
 
   await gradle();
 });

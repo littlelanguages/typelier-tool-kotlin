@@ -1,0 +1,16 @@
+SetDeclaration ::
+    name: ID
+    elements: Seq ID;
+
+ID ::
+    location: Location
+    id: String;
+
+Location ::
+    start: Position
+    end: Position;
+
+Position ::
+    offset: S32
+    line: S32
+    column: S32;
