@@ -42,20 +42,19 @@ const writeTypess = (
 
   return Promise.all(
     typess.map((types) => writeTypes(types, unionDeps, srcs, options)),
-  )
-    .then((
-      rs,
-    ) => rs.flatMap((i) => i));
+  ).then((rs) => rs.flatMap((i) => i));
 };
+
+type UnionElementType =
+  | Typepiler.UnionDeclaration
+  | Typepiler.SimpleComposite
+  | Typepiler.RecordComposite;
 
 const calculateUnionDeps = (typess: Array<Typepiler.Types>): UnionDeps => {
   const result: UnionDeps = [];
 
   const addDep = (
-    element:
-      | Typepiler.UnionDeclaration
-      | Typepiler.SimpleComposite
-      | Typepiler.RecordComposite,
+    element: UnionElementType,
     union: Typepiler.UnionDeclaration,
   ) => {
     const unionDep = findUnionDep(element, result);
@@ -77,20 +76,10 @@ const calculateUnionDeps = (typess: Array<Typepiler.Types>): UnionDeps => {
   return result;
 };
 
-type UnionDeps = Array<
-  [
-    | Typepiler.UnionDeclaration
-    | Typepiler.SimpleComposite
-    | Typepiler.RecordComposite,
-    Array<Typepiler.UnionDeclaration>,
-  ]
->;
+type UnionDeps = Array<[UnionElementType, Array<Typepiler.UnionDeclaration>]>;
 
 const findUnionDep = (
-  declaration:
-    | Typepiler.UnionDeclaration
-    | Typepiler.SimpleComposite
-    | Typepiler.RecordComposite,
+  declaration: UnionElementType,
   unionDeps: UnionDeps,
 ): Array<Typepiler.UnionDeclaration> | undefined => {
   const result = unionDeps.find((dep) => dep[0].name === declaration.name);
@@ -104,10 +93,7 @@ const writeTypes = async (
   srcs: Array<CommandSrc>,
   options: CommandOptions,
 ): Promise<Errors.Errors> => {
-  const src = findSrc(
-    types.canonicalFileName,
-    srcs,
-  );
+  const src = findSrc(types.canonicalFileName, srcs);
 
   if (src === undefined) {
     return Promise.resolve([
@@ -203,13 +189,7 @@ const renderRecordDeclaration = (
   const deps = findUnionDep(declaration, unionDeps);
 
   return PP.vcat([
-    PP.hcat(
-      [
-        "data class ",
-        declaration.name,
-        "(",
-      ],
-    ),
+    PP.hcat(["data class ", declaration.name, "("]),
     PP.hcat([
       PP.nest(
         2,
@@ -249,16 +229,11 @@ const renderAliasDeclaration = (
 
 const renderUnionDeclaration = (
   declaration: Typepiler.UnionDeclaration,
-): PP.Doc =>
-  PP.hcat(
-    ["interface ", declaration.name],
-  );
+): PP.Doc => PP.hcat(["interface ", declaration.name]);
 
 const renderType = (
   ctx:
-    | Typepiler.SetDeclaration
     | Typepiler.AliasDeclaration
-    | Typepiler.UnionDeclaration
     | Typepiler.SimpleComposite
     | Typepiler.RecordComposite,
   type: Typepiler.Type,
@@ -297,9 +272,7 @@ const renderType = (
 
 const declarationClassReference = (
   ctx:
-    | Typepiler.SetDeclaration
     | Typepiler.AliasDeclaration
-    | Typepiler.UnionDeclaration
     | Typepiler.SimpleComposite
     | Typepiler.RecordComposite,
   declaration: Typepiler.Declaration,
