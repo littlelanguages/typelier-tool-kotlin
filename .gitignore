@@ -5,3 +5,4 @@ test/src/main/kotlin/io/littlelanguages/data/Union.kt
 test/src/main/kotlin/composite/Simple.kt
 test/src/main/kotlin/composite/Record.kt
 test/src/main/kotlin/alias/Sample.kt
+test/src/main/kotlin/union/Sample.kt

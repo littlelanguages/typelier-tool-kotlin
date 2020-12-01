@@ -3,34 +3,18 @@ import { exec, OutputMode } from "./deps/exec.ts";
 import { command } from "./mod.ts";
 
 Deno.test("typepiler-tool-kotlin", async () => {
-  await testpiler("sets", "Types");
-  await testpiler("composite", "Simple");
-  await testpiler("composite", "Record");
-  await testpilers(
-    [["alias", "Sample"], ["composite", "Simple"], ["composite", "Record"]],
-  );
-  await testpilers([["union", "Sample"], ["composite", "Record"]]);
+  await testpiler([
+    ["sets", "Types"],
+    ["alias", "Sample"],
+    ["union", "Sample"],
+    ["composite", "Simple"],
+    ["composite", "Record"],
+  ]);
 
   await gradle();
 });
 
-async function testpiler(dir: string, name: string): Promise<void> {
-  const errors = await command(
-    [{
-      src: `./test/src/main/kotlin/${dir}/${name}.llt`,
-      package: `${dir}.${name}`,
-    }],
-    {
-      directory: "./test/src/main/kotlin",
-      force: true,
-      verbose: true,
-    },
-  );
-
-  assertEquals(errors, []);
-}
-
-async function testpilers(srcs: Array<[string, string]>): Promise<void> {
+async function testpiler(srcs: Array<[string, string]>): Promise<void> {
   const errors = await command(
     srcs.map(([dir, name]) => ({
       src: `./test/src/main/kotlin/${dir}/${name}.llt`,
