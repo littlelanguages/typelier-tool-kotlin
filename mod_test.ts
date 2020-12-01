@@ -9,6 +9,7 @@ Deno.test("typepiler-tool-kotlin", async () => {
   await testpilers(
     [["alias", "Sample"], ["composite", "Simple"], ["composite", "Record"]],
   );
+  await testpilers([["union", "Sample"], ["composite", "Record"]]);
 
   await gradle();
 });

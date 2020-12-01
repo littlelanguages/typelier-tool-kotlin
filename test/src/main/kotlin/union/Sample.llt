@@ -1,0 +1,14 @@
+use "../composite/Record.llt" as Record;
+
+Type = 
+    Tuple | Reference | Parenthesis | Record.ID;
+
+Tuple :: Seq Type;
+
+Reference ::
+    name: Record.ID
+    parameters: Seq Type;
+
+Parenthesis ::
+    location: Record.Location
+    type: Type;
