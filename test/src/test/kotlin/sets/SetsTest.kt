@@ -5,16 +5,16 @@ import io.kotest.matchers.shouldBe
 
 class SetsTest : StringSpec({
     "Boolean" {
-        (Boolean.True is Boolean) shouldBe true
-        (Boolean.False is Boolean) shouldBe true
+        Boolean.True.yaml() shouldBe "True"
+        Boolean.False.yaml() shouldBe "False"
     }
 
     "BinaryOp" {
-        (BinaryOp.Equal is BinaryOp) shouldBe true
-        (BinaryOp.NotEqual is BinaryOp) shouldBe true
-        (BinaryOp.LessEqual is BinaryOp) shouldBe true
-        (BinaryOp.LessThan is BinaryOp) shouldBe true
-        (BinaryOp.GreaterEqual is BinaryOp) shouldBe true
-        (BinaryOp.GreaterThan is BinaryOp) shouldBe true
+        BinaryOp.Equal.yaml() shouldBe "Equal"
+        BinaryOp.NotEqual.yaml() shouldBe "NotEqual"
+        BinaryOp.LessEqual.yaml() shouldBe "LessEqual"
+        BinaryOp.LessThan.yaml() shouldBe "LessThan"
+        BinaryOp.GreaterEqual.yaml() shouldBe "GreaterEqual"
+        BinaryOp.GreaterThan.yaml() shouldBe "GreaterThan"
     }
 })

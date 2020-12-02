@@ -125,6 +125,8 @@ const renderDeclarations = (
   PP.vcat([
     PP.hsep(["package", packageName(className)]),
     "",
+    "import io.littlelanguages.data.Yamlable",
+    "",
     PP.vcat(
       declarations.map((d) =>
         PP.vcat([renderDeclaration(d, unionDeps, srcs), ""])
@@ -151,8 +153,32 @@ const renderDeclaration = (
 
 const renderSetDeclaration = (declaration: Typepiler.SetDeclaration): PP.Doc =>
   PP.vcat([
-    PP.hsep(["enum class", declaration.name, "{"]),
-    PP.nest(2, PP.hsep(declaration.elements, ", ")),
+    PP.hcat(["enum class ", declaration.name, " : Yamlable {"]),
+    PP.nest(
+      2,
+      PP.vcat(
+        [
+          PP.hcat([PP.hsep(declaration.elements, ", "), ";"]),
+          "",
+          "override fun yaml(): Any =",
+          PP.nest(
+            2,
+            PP.vcat([
+              "when (this) {",
+              PP.nest(
+                2,
+                PP.vcat(
+                  declaration.elements.map((n) =>
+                    PP.hcat([n, ' -> "', n, '"'])
+                  ),
+                ),
+              ),
+              "}",
+            ]),
+          ),
+        ],
+      ),
+    ),
     "}",
   ]);
 
