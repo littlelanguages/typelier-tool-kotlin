@@ -386,6 +386,11 @@ export const copyLibrary = async (
   };
 
   await copyFile(
+    "lib/kotlin/Yamlable.kt",
+    "io/littlelanguages/data/Yamlable.kt",
+  );
+
+  await copyFile(
     "lib/kotlin/Tuple.kt",
     "io/littlelanguages/data/Tuple.kt",
   );
