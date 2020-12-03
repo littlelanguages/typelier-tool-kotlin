@@ -101,6 +101,11 @@ const writeTypes = async (
     ]);
   } else {
     const fileName = targetFileName(src, options);
+
+    if (options.verbose) {
+      console.log(`Writing ${fileName}`);
+    }
+
     const doc = renderDeclarations(
       src.package,
       types.declarations,
@@ -501,7 +506,9 @@ export const copyLibrary = async (
     if (options.force || fileDateTime(outputFileName) === 0) {
       const srcFileName = `${Path.dirname(import.meta.url)}/${srcName}`;
 
-      console.log(`Copy ${srcName}`);
+      if (options.verbose) {
+        console.log(`Copy ${srcName}`);
+      }
 
       return Deno.mkdir(Path.dirname(outputFileName), { recursive: true })
         .then((_) =>
