@@ -405,6 +405,8 @@ const renderTypeYaml = (name: string, type: Typepiler.Type): PP.Doc =>
           ")}",
         ],
       )
+      : type.declaration.name === "String"
+      ? PP.hcat(['"\\"${', name, '}\\""'])
       : PP.text(name))
     : PP.hcat([name, ".yaml()"]);
 
