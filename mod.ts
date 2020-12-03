@@ -189,22 +189,52 @@ const renderSimpleDeclaration = (
 ): PP.Doc => {
   const deps = findUnionDep(declaration, unionDeps);
 
-  return PP.hcat(
-    [
-      "data class ",
-      declaration.name,
-      "(val state: ",
-      renderType(declaration, declaration.type, srcs),
-      ")",
-      deps === undefined ? PP.blank : PP.hcat([
-        ": ",
-        PP.hsep(
-          deps.map((dep) => declarationClassReference(declaration, dep, srcs)),
+  return PP.vcat([
+    PP.hcat(
+      [
+        "data class ",
+        declaration.name,
+        "(",
+      ],
+    ),
+    PP.nest(
+      4,
+      PP.hcat([
+        "val state: ",
+        renderType(declaration, declaration.type, srcs),
+        ") : Yamlable",
+        deps === undefined ? PP.blank : PP.hcat([
           ", ",
+          PP.hsep(
+            deps.map((dep) =>
+              declarationClassReference(declaration, dep, srcs)
+            ),
+            ", ",
+          ),
+        ]),
+        " {",
+      ]),
+    ),
+    PP.nest(
+      2,
+      PP.vcat([
+        "override fun yaml(): Any =",
+        PP.nest(
+          2,
+          PP.hcat(
+            [
+              'singletonMap("',
+              declaration.name,
+              '", ',
+              renderTypeYaml("state", declaration.type),
+              ")",
+            ],
+          ),
         ),
       ]),
-    ],
-  );
+    ),
+    "}",
+  ]);
 };
 
 const renderRecordDeclaration = (
@@ -218,7 +248,7 @@ const renderRecordDeclaration = (
     PP.hcat(["data class ", declaration.name, "("]),
     PP.hcat([
       PP.nest(
-        2,
+        4,
         PP.vcat(
           PP.punctuate(
             ",",
@@ -228,15 +258,49 @@ const renderRecordDeclaration = (
           ),
         ),
       ),
-      ")",
+      ") : Yamlable",
       deps === undefined ? PP.blank : PP.hcat([
-        ": ",
+        ", ",
         PP.hsep(
           deps.map((dep) => declarationClassReference(declaration, dep, srcs)),
           ", ",
         ),
       ]),
+      " {",
     ]),
+    PP.nest(
+      2,
+      PP.vcat([
+        "override fun yaml(): Any =",
+        PP.nest(
+          2,
+          PP.vcat([
+            PP.hcat(['singletonMap("', declaration.name, '", mapOf(']),
+            PP.nest(
+              2,
+              PP.hcat([
+                PP.vcat(
+                  PP.punctuate(
+                    ",",
+                    declaration.fields.map(([n, t]) =>
+                      PP.hcat([
+                        'Pair("',
+                        n,
+                        '", ',
+                        renderTypeYaml(n, t),
+                        ")",
+                      ])
+                    ),
+                  ),
+                ),
+                "))",
+              ]),
+            ),
+          ]),
+        ),
+      ]),
+    ),
+    "}",
   ]);
 };
 
@@ -255,7 +319,7 @@ const renderAliasDeclaration = (
 
 const renderUnionDeclaration = (
   declaration: Typepiler.UnionDeclaration,
-): PP.Doc => PP.hcat(["interface ", declaration.name]);
+): PP.Doc => PP.hcat(["interface ", declaration.name, " : Yamlable"]);
 
 const renderType = (
   ctx:
@@ -295,6 +359,54 @@ const renderType = (
         type.declaration.name,
       ],
     );
+
+const renderTypeYaml = (name: string, type: Typepiler.Type): PP.Doc =>
+  (type.tag === "Tuple")
+    ? PP.vcat([
+      "mapOf(",
+      PP.nest(
+        2,
+        PP.hcat([
+          PP.vcat(
+            PP.punctuate(
+              ",",
+              type.value.map((v, idx) =>
+                PP.hcat([
+                  'Pair("',
+                  String.fromCharCode(idx + 97),
+                  '", ',
+                  renderTypeYaml(`${name}.${String.fromCharCode(idx + 97)}`, v),
+                  ")",
+                ])
+              ),
+            ),
+          ),
+          ")",
+        ]),
+      ),
+    ])
+    : (type.declaration.tag === "InternalDeclaration")
+    ? (type.declaration.name === "Seq"
+      ? PP.hcat(
+        [name, ".map { ", renderTypeYaml("it", type.parameters[0]), " }"],
+      )
+      : type.declaration.name === "Set"
+      ? PP.hcat(
+        [name, ".map { ", renderTypeYaml("it", type.parameters[0]), " }"],
+      )
+      : type.declaration.name === "Map"
+      ? PP.hcat(
+        [
+          name,
+          ".map { Pair(",
+          renderTypeYaml("it.key", type.parameters[0]),
+          ", ",
+          renderTypeYaml("it.value", type.parameters[1]),
+          ")}",
+        ],
+      )
+      : PP.text(name))
+    : PP.hcat([name, ".yaml()"]);
 
 const declarationClassReference = (
   ctx:
