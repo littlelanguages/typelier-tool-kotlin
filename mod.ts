@@ -1,16 +1,15 @@
-import { right } from "https://raw.githubusercontent.com/littlelanguages/deno-lib-data-either/0.1.2/mod.ts";
 import * as Path from "./deps/path.ts";
 import * as PP from "./deps/prettyprint.ts";
 import * as Typepiler from "./deps/typepiler.ts";
 
 import * as Errors from "./errors.ts";
 
-type CommandSrc = {
+export type CommandSrc = {
   src: string;
   package: string;
 };
 
-type CommandOptions = {
+export type CommandOptions = {
   directory: string | undefined;
   force: boolean;
   verbose: boolean;
