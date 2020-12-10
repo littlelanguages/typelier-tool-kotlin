@@ -2,7 +2,8 @@ import * as Path from "./deps/path.ts";
 import * as PP from "./deps/prettyprint.ts";
 import * as Typepiler from "./deps/typepiler.ts";
 
-import * as Errors from "./errors.ts";
+export * from "./errors.ts";
+import { Errors } from "./errors.ts";
 
 export type CommandSrc = {
   src: string;
@@ -18,7 +19,7 @@ export type CommandOptions = {
 export const command = (
   srcs: Array<CommandSrc>,
   options: CommandOptions,
-): Promise<Errors.Errors> => {
+): Promise<Errors> => {
   const buildResult = (mustBuild(srcs, options))
     ? Typepiler.translateFiles(srcs.map((src) => src.src)).then(
       (translateResult) =>
@@ -36,7 +37,7 @@ const writeTypess = (
   typess: Array<Typepiler.Types>,
   srcs: Array<CommandSrc>,
   options: CommandOptions,
-): Promise<Errors.Errors> => {
+): Promise<Errors> => {
   const unionDeps = calculateUnionDeps(typess);
 
   return Promise.all(
@@ -91,7 +92,7 @@ const writeTypes = async (
   unionDeps: UnionDeps,
   srcs: Array<CommandSrc>,
   options: CommandOptions,
-): Promise<Errors.Errors> => {
+): Promise<Errors> => {
   const src = findSrc(types.canonicalFileName, srcs);
 
   if (src === undefined) {
